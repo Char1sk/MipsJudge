@@ -1,22 +1,44 @@
+
+/**
+ * @author Char1sk
+ */
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Scanner;
 
+/**
+ * @author Char1sk
+ */
 public class Assembler {
-    // Classes
     enum InstructionType {
-        RType,
-        IType,
-        JType
+        // Instruction Type
+        Rtype,
+        Itype,
+        Jtype
     }
     class Instruction {
+        // Attributes
         protected InstructionType type;
         protected String content;
         protected String name;
+        // Constructors
+        public Instruction() {
+
+        }
+        public Instruction(String s) {
+            content = s.replace(',', ' ').toLowerCase(Locale.ROOT).trim();
+            name = content.substring(0, content.indexOf(' '));
+            type = typeTable.get(name);
+            System.out.println(content);//
+            System.out.println(name);//
+            System.out.println(type);//
+        }
     }
-    class RTypeInstruction extends Instruction {
+    class RtypeInstruction extends Instruction {
         protected String opcode;    //  6bit, 31:26
         protected String rs;        //  5bit, 25:21
         protected String rt;        //  5bit, 20:16
@@ -24,32 +46,42 @@ public class Assembler {
         protected String shamt;     //  5bit, 10: 6
         protected String funct;     //  6bit,  5: 0
     }
-    class ITypeInstruction extends Instruction {
+    class ItypeInstruction extends Instruction {
         protected String opcode;    //  6bit, 31:26
         protected String rs;        //  5bit, 25:21
         protected String rt;        //  5bit, 20:16
         protected String offset;    // 16bit, 15: 0
     }
-    class JTypeInstruction extends Instruction {
+    class JtypeInstruction extends Instruction {
         protected String opcode;    //  6bit, 31:26
         protected String immediate; // 24bit, 25: 0
     }
     // Attributes
-    // instructions related
-    protected ArrayList<String> instructions;
+
+    protected ArrayList<Instruction> instructions;
     protected int totalNumber;
     protected int nowNumber;
-    // static table related
+
     protected static HashMap<String, String> registerTable;
     protected static HashMap<String, InstructionType> typeTable;
     protected static HashMap<String, String> opcodeTable;
     protected static HashMap<String, String> functTable;
-    // Functions
-    // constructor
+
     public Assembler() {
 
     }
-    // static table initialize
+    public Assembler(String path) {
+        initializeTables();
+//                Instruction instruction = new Instruction(path);
+//        instructions = new ArrayList<>();
+//        try {
+//            Scanner inStream = new Scanner(new File(path));
+//        }
+//        catch (FileNotFoundException exception) {
+//            System.out.println("No such file");
+//        }
+    }
+
     protected static void initializeTables() {
         initializeRegisterTable();
         initializeTypeTable();
@@ -57,7 +89,7 @@ public class Assembler {
         initializeFunctTable();
     }
     protected static void initializeRegisterTable() {
-        registerTable = new HashMap<>();
+        registerTable = new HashMap<>(32);
         registerTable.put("$zero", "00000");
         registerTable.put("$at",   "00001");
         registerTable.put("$v0",   "00010");
@@ -92,74 +124,74 @@ public class Assembler {
         registerTable.put("$ra",   "11111");
     }
     protected static void initializeTypeTable() {
-        typeTable = new HashMap<>();
+        typeTable = new HashMap<>(64);
         // load type
-        typeTable.put("lb",      InstructionType.IType);
-        typeTable.put("lbu",     InstructionType.IType);
-        typeTable.put("lh",      InstructionType.IType);
-        typeTable.put("lhu",     InstructionType.IType);
-        typeTable.put("lw",      InstructionType.IType);
+        typeTable.put("lb",      InstructionType.Itype);
+        typeTable.put("lbu",     InstructionType.Itype);
+        typeTable.put("lh",      InstructionType.Itype);
+        typeTable.put("lhu",     InstructionType.Itype);
+        typeTable.put("lw",      InstructionType.Itype);
         // save type
-        typeTable.put("sb",      InstructionType.IType);
-        typeTable.put("sh",      InstructionType.IType);
-        typeTable.put("sw",      InstructionType.IType);
+        typeTable.put("sb",      InstructionType.Itype);
+        typeTable.put("sh",      InstructionType.Itype);
+        typeTable.put("sw",      InstructionType.Itype);
         // R-R type
-        typeTable.put("add",     InstructionType.RType);
-        typeTable.put("addu",    InstructionType.RType);
-        typeTable.put("sub",     InstructionType.RType);
-        typeTable.put("subu",    InstructionType.RType);
-        typeTable.put("mult",    InstructionType.RType);
-        typeTable.put("multu",   InstructionType.RType);
-        typeTable.put("div",     InstructionType.RType);
-        typeTable.put("divu",    InstructionType.RType);
-        typeTable.put("slt",     InstructionType.RType);
-        typeTable.put("sltu",    InstructionType.RType);
-        typeTable.put("sll",     InstructionType.RType);
-        typeTable.put("srl",     InstructionType.RType);
-        typeTable.put("sra",     InstructionType.RType);
-        typeTable.put("sllv",    InstructionType.RType);
-        typeTable.put("srlv",    InstructionType.RType);
-        typeTable.put("srav",    InstructionType.RType);
-        typeTable.put("and",     InstructionType.RType);
-        typeTable.put("or",      InstructionType.RType);
-        typeTable.put("xor",     InstructionType.RType);
-        typeTable.put("nor",     InstructionType.RType);
+        typeTable.put("add",     InstructionType.Rtype);
+        typeTable.put("addu",    InstructionType.Rtype);
+        typeTable.put("sub",     InstructionType.Rtype);
+        typeTable.put("subu",    InstructionType.Rtype);
+        typeTable.put("mult",    InstructionType.Rtype);
+        typeTable.put("multu",   InstructionType.Rtype);
+        typeTable.put("div",     InstructionType.Rtype);
+        typeTable.put("divu",    InstructionType.Rtype);
+        typeTable.put("slt",     InstructionType.Rtype);
+        typeTable.put("sltu",    InstructionType.Rtype);
+        typeTable.put("sll",     InstructionType.Rtype);
+        typeTable.put("srl",     InstructionType.Rtype);
+        typeTable.put("sra",     InstructionType.Rtype);
+        typeTable.put("sllv",    InstructionType.Rtype);
+        typeTable.put("srlv",    InstructionType.Rtype);
+        typeTable.put("srav",    InstructionType.Rtype);
+        typeTable.put("and",     InstructionType.Rtype);
+        typeTable.put("or",      InstructionType.Rtype);
+        typeTable.put("xor",     InstructionType.Rtype);
+        typeTable.put("nor",     InstructionType.Rtype);
         // R-I type
-        typeTable.put("addi",    InstructionType.IType);
-        typeTable.put("addiu",   InstructionType.IType);
-        typeTable.put("andi",    InstructionType.IType);
-        typeTable.put("ori",     InstructionType.IType);
-        typeTable.put("xori",    InstructionType.IType);
-        typeTable.put("lui",     InstructionType.IType);
-        typeTable.put("slti",    InstructionType.IType);
-        typeTable.put("sltiu",   InstructionType.IType);
+        typeTable.put("addi",    InstructionType.Itype);
+        typeTable.put("addiu",   InstructionType.Itype);
+        typeTable.put("andi",    InstructionType.Itype);
+        typeTable.put("ori",     InstructionType.Itype);
+        typeTable.put("xori",    InstructionType.Itype);
+        typeTable.put("lui",     InstructionType.Itype);
+        typeTable.put("slti",    InstructionType.Itype);
+        typeTable.put("sltiu",   InstructionType.Itype);
         // branch type
-        typeTable.put("beq",     InstructionType.IType);
-        typeTable.put("bne",     InstructionType.IType);
-        typeTable.put("blez",    InstructionType.IType);
-        typeTable.put("bgtz",    InstructionType.IType);
-        typeTable.put("bltz",    InstructionType.IType);
-        typeTable.put("bgez",    InstructionType.IType);
+        typeTable.put("beq",     InstructionType.Itype);
+        typeTable.put("bne",     InstructionType.Itype);
+        typeTable.put("blez",    InstructionType.Itype);
+        typeTable.put("bgtz",    InstructionType.Itype);
+        typeTable.put("bltz",    InstructionType.Itype);
+        typeTable.put("bgez",    InstructionType.Itype);
         // jump type
-        typeTable.put("j",       InstructionType.JType);
-        typeTable.put("jal",     InstructionType.JType);
-        typeTable.put("jalr",    InstructionType.RType);
-        typeTable.put("jr",      InstructionType.RType);
+        typeTable.put("j",       InstructionType.Jtype);
+        typeTable.put("jal",     InstructionType.Jtype);
+        typeTable.put("jalr",    InstructionType.Rtype);
+        typeTable.put("jr",      InstructionType.Rtype);
         // move type
-        typeTable.put("mfhi",    InstructionType.RType);
-        typeTable.put("mflo",    InstructionType.RType);
-        typeTable.put("mthi",    InstructionType.RType);
-        typeTable.put("mtlo",    InstructionType.RType);
+        typeTable.put("mfhi",    InstructionType.Rtype);
+        typeTable.put("mflo",    InstructionType.Rtype);
+        typeTable.put("mthi",    InstructionType.Rtype);
+        typeTable.put("mtlo",    InstructionType.Rtype);
         // special type
-        typeTable.put("eret",    InstructionType.RType);
-        typeTable.put("mfc0",    InstructionType.RType);
-        typeTable.put("mtc0",    InstructionType.RType);
+        typeTable.put("eret",    InstructionType.Rtype);
+        typeTable.put("mfc0",    InstructionType.Rtype);
+        typeTable.put("mtc0",    InstructionType.Rtype);
         // trap type
-        typeTable.put("break",   InstructionType.RType);
-        typeTable.put("syscall", InstructionType.RType);
+        typeTable.put("break",   InstructionType.Rtype);
+        typeTable.put("syscall", InstructionType.Rtype);
     }
     protected static void initializeOpcodeTable() {
-        opcodeTable = new HashMap<>();
+        opcodeTable = new HashMap<>(64);
         opcodeTable.put("lb",      "100000");
         opcodeTable.put("lbu",     "100100");
         opcodeTable.put("lh",      "100001");
@@ -216,7 +248,7 @@ public class Assembler {
         opcodeTable.put("syscall", "000000");
     }
     protected static void initializeFunctTable() {
-        functTable = new HashMap<>();
+        functTable = new HashMap<>(32);
         functTable.put("add",     "100000");
         functTable.put("addu",    "100001");
         functTable.put("sub",     "100010");
@@ -251,12 +283,7 @@ public class Assembler {
 
 class TestClass {
     public static void main(String[] args) {
-        try {
-            Scanner inStream = new Scanner(new File("test_code.txt"));
-        }
-        catch (FileNotFoundException exception) {
-            System.out.println("No such file!");
-        }
-        Assembler assembler = new Assembler();
+//        Assembler assembler = new Assembler("./src/test_code.txt");
+        Assembler assembler = new Assembler("    add    $t1,   $t2,   $t3  ");
     }
 }
